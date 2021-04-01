@@ -1,9 +1,14 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class AppWidget extends StatelessWidget {
+  //Github token
+  // 8b441e6903189dcd7f2f457eaea14e6bad5367a4
+  final String personalAccessToken = "8b441e6903189dcd7f2f457eaea14e6bad5367a4";
+
   @override
   Widget build(BuildContext context) {
     //Obtendo o token de uma variável de ambiente
