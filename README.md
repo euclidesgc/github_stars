@@ -16,3 +16,8 @@ Consumindo a API GraphQL do GitHub, você deve fazer um app com o seguinte funci
 2. Liste os repos estrelados do usuário buscado;
     a. Exiba os seguintes dados do usuário buscado: nickname, avatar, bio, localização, email e URL;
     b. Exiba os seguintes dados dos repositórios encontrados: nome do repo, descrição e quantidade de favoritos;
+------------------------------------------------------------------------------------------
+## v. 0.1
+  - Layout da página concluído
+  - Variável de ambiente criada
+  
