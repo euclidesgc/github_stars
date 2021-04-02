@@ -1,5 +1,0 @@
-class HomeRepository {
-  getUser() {}
-
-  obterRepositorios() {}
-}

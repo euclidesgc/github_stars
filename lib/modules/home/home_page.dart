@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:github_stars/modules/home/home_controller.dart';
 import 'package:github_stars/modules/home/models/user_model.dart';
+import 'package:github_stars/modules/utils/debouncer.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-class HomePage extends StatelessWidget {
-  final HomeController controller;
+import 'widgets/card_header.dart';
+import 'widgets/title_header.dart';
 
-  const HomePage({Key key, this.controller}) : super(key: key);
-
+class HomePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    String query = '''
-      {
-        user(login: "Euclidesgc") {
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _debouncer = Debouncer(milliseconds: 300);
+
+  String busca;
+
+  final String query = '''
+      query ReadRepositories(\$nText: String!) {
+        user(login: \$nText) {
           name
           login
           avatarUrl
@@ -20,32 +26,49 @@ class HomePage extends StatelessWidget {
           location
           email
           url
-          starredRepositories{
-            nodes{
+          starredRepositories {
+            nodes {
               name
               description
               url
             }
           }
         }
-      }
+      }      
     ''';
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Github Stars campo de pe"),
+        title: TextField(
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: "Pesquisar...",
+            hintStyle: TextStyle(color: Colors.white),
+          ),
+          onChanged: (value) {
+            _debouncer.run(
+              () => setState(
+                () => busca = value,
+              ),
+            );
+          },
+        ),
         centerTitle: true,
       ),
       body: Query(
           options: QueryOptions(
-            documentNode: gql(query),
+            document: gql(query),
+            variables: {'nText': "$busca"},
           ),
-          builder: (
-            QueryResult result, {
-            Refetch refetch,
-            FetchMore fetchMore,
-          }) {
-            if (result.data == null) {
+          builder: (QueryResult result,
+              {VoidCallback refetch, FetchMore fetchMore}) {
+            if (result.hasException) {
+              return Center(child: Text("Não localizado!"));
+            }
+
+            if (result.isLoading || result.data == null) {
               return Center(
                 child: CircularProgressIndicator(),
               );
@@ -58,7 +81,9 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CardHeader(user: user),
-                    TitleHeader(),
+                    TitleHeader(
+                      qtdRepositories: user.starredRepositories.nodes.length,
+                    ),
                     ListView.builder(
                       itemCount: user.starredRepositories.nodes.length,
                       physics: NeverScrollableScrollPhysics(),
@@ -93,75 +118,6 @@ class HomePage extends StatelessWidget {
               );
             }
           }),
-    );
-  }
-}
-
-class TitleHeader extends StatelessWidget {
-  const TitleHeader({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Text(
-        "Repositórios favoritos",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class CardHeader extends StatelessWidget {
-  const CardHeader({
-    Key key,
-    @required this.user,
-  }) : super(key: key);
-
-  final UserModel user;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8),
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: CircleAvatar(
-                    child: Image.network(user.avatarUrl),
-                    minRadius: 20,
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Nome: ${user.name}"),
-                        Text("Login: ${user.login}"),
-                        Text("URL: ${user.url}"),
-                        Text("Localidade: ${user.location}"),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Text("Bio: ${user.bio}"),
-          ],
-        ),
-      ),
     );
   }
 }
