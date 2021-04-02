@@ -55,5 +55,3 @@ Consumindo a API GraphQL do GitHub, você deve fazer um app com o seguinte funci
   Outra questão, é que a tarefa pede para pesquisar usuário por nome ou apelido, porém só achei formas de pesquisar pelo login, e não encontrei nenhum campo chamado apelido.
 
 
-
-
